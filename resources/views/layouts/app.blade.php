@@ -10,15 +10,40 @@
 </head>
 <body class="bg-light">
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="/">
-                <i class="fas fa-home me-2"></i>Laravel App
-            </a>
-            
-            <div class="navbar-nav ms-auto">
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <i class="fas fa-tools me-2"></i>Mogok
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
                 @auth
-                    <div class="nav-item dropdown">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('parts.index') }}">
+                            <i class="fas fa-cogs me-1"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('categories.index') }}">
+                            <i class="fas fa-list me-1"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('compatibles.index') }}">
+                            <i class="fas fa-car me-1"></i>
+                        </a>
+                    </li>
+                @endauth
+            </ul>
+
+            <ul class="navbar-nav ms-auto">
+                @auth
+                    <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                             <i class="fas fa-user me-1"></i>{{ Auth::user()->name }}
                         </a>
@@ -34,14 +59,16 @@
                                 </form>
                             </li>
                         </ul>
-                    </div>
+                    </li>
                 @else
-                    <a class="nav-link" href="{{ route('login') }}">Login</a>
-                    <a class="nav-link" href="{{ route('register') }}">Register</a>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">Login</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('register') }}">Register</a></li>
                 @endauth
-            </div>
+            </ul>
         </div>
-    </nav>
+    </div>
+</nav>
+
 
     <!-- Alert Messages -->
     <div class="container mt-3">
@@ -62,6 +89,14 @@
 
     <!-- Main Content -->
     <main class="container mt-4">
+    <!-- Breadcrumb -->
+        @if(View::hasSection('breadcrumb'))
+            <nav aria-label="breadcrumb" class="mt-2">
+                <ol class="breadcrumb">
+                    @yield('breadcrumb')
+                </ol>
+            </nav>
+        @endif
         @yield('content')
     </main>
 

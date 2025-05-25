@@ -3,6 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\PartController;
+use App\Http\Controllers\CompatibleController;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -20,4 +23,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::resource('categories', CategoryController::class);
+    Route::resource('parts', PartController::class);
+    Route::resource('compatibles', CompatibleController::class);
 });
