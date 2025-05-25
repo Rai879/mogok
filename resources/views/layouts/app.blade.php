@@ -23,32 +23,33 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
                 @auth
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('parts.index') }}">
-                            <i class="fas fa-cogs me-1"></i>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('categories.index') }}">
-                            <i class="fas fa-list me-1"></i>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('compatibles.index') }}">
-                            <i class="fas fa-car me-1"></i>
-                        </a>
-                    </li>
+                    {{-- searchbar --}}
                 @endauth
             </ul>
 
             <ul class="navbar-nav ms-auto">
                 @auth
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user me-1"></i>{{ Auth::user()->name }}
+                    <li class="nav-item ">
+                        <a class="nav-link" title="Parts" href="{{ route('parts.index') }}">
+                            <i class="fas fa-cogs me-1"></i>
                         </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('dashboard') }}">Dashboard</a></li>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" title="Categories" href="{{ route('categories.index') }}">
+                            <i class="fas fa-list me-1"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" title="Compatibles" href="{{ route('compatibles.index') }}">
+                            <i class="fas fa-car me-1"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown ">
+                        <a class="nav-link dropdown-toggle nav-link rounded-pill bg-white text-primary px-3 mx-1" title="Logged as {{ Auth::user()->name }}" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user me-1"></i>
+                        </a>
+                        <ul class="dropdown-menu ">
+                            <li class="dropdown-item">Logged as {{ Auth::user()->name }}</li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form action="{{ route('logout') }}" method="POST" class="d-inline">
