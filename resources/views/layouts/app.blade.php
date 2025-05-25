@@ -7,100 +7,246 @@
     <title>@yield('title', 'Laravel App')</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            width: 250px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: #0d6efd;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        
+        .sidebar.collapsed {
+            width: 70px;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+        }
+        
+        .sidebar .nav-link:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar .nav-link.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .sidebar-brand {
+            padding: 20px;
+            color: white;
+            text-decoration: none;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-brand:hover {
+            color: white;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            transition: all 0.3s;
+            min-height: 100vh;
+        }
+        
+        .main-content.expanded {
+            margin-left: 70px;
+        }
+        
+        .sidebar-brand:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-text {
+            opacity: 1;
+            transition: opacity 0.3s;
+        }
+        
+        .sidebar.collapsed .sidebar-text {
+            opacity: 0;
+        }
+        
+        .user-section {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .mobile-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 999;
+            }
+            
+            .mobile-overlay.show {
+                display: block;
+            }
+        }
+    </style>
 </head>
 <body class="bg-light">
-    <!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <div class="container">
-        <a class="navbar-brand" href="/">
-            <i class="fas fa-tools me-2"></i>Mogok
-        </a>
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay"></div>
 
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto">
-                @auth
-                    {{-- searchbar --}}
-                @endauth
-            </ul>
-
-            <ul class="navbar-nav ms-auto">
-                @auth
-                    <li class="nav-item ">
-                        <a class="nav-link" title="Parts" href="{{ route('parts.index') }}">
-                            <i class="fas fa-cogs me-1"></i>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" title="Categories" href="{{ route('categories.index') }}">
-                            <i class="fas fa-list me-1"></i>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" title="Compatibles" href="{{ route('compatibles.index') }}">
-                            <i class="fas fa-car me-1"></i>
-                        </a>
-                    </li>
-                    <li class="nav-item dropdown ">
-                        <a class="nav-link dropdown-toggle nav-link rounded-pill bg-white text-primary px-3 mx-1" title="Logged as {{ Auth::user()->name }}" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user me-1"></i>
-                        </a>
-                        <ul class="dropdown-menu ">
-                            <li class="dropdown-item">Logged as {{ Auth::user()->name }}</li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <form action="{{ route('logout') }}" method="POST" class="d-inline">
-                                    @csrf
-                                    <button type="submit" class="dropdown-item">
-                                        <i class="fas fa-sign-out-alt me-1"></i>Logout
-                                    </button>
-                                </form>
-                            </li>
-                        </ul>
-                    </li>
-                @else
-                    <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">Login</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('register') }}">Register</a></li>
-                @endauth
-            </ul>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <!-- Brand as Toggle -->
+        <div class="sidebar-brand d-flex align-items-center text-decoration-none" id="toggleSidebar" style="cursor: pointer;">
+            <i class="fas fa-tools me-2"></i>
+            <span class="sidebar-text">Mogok</span>
         </div>
-    </div>
-</nav>
 
+        <!-- Navigation -->
+        <nav class="nav flex-column h-100">
+            @auth
+                <!-- Main Navigation -->
+                <a class="nav-link d-flex align-items-center" href="{{ route('dashboard') }}">
+                    <i class="fas fa-tachometer-alt me-2"></i>
+                    <span class="sidebar-text">Dashboard</span>
+                </a>
 
-    <!-- Alert Messages -->
-    <div class="container mt-3">
-        @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="fas fa-exclamation-circle me-2"></i>{{ session('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
+                <a class="nav-link d-flex align-items-center" href="{{ route('parts.index') }}">
+                    <i class="fas fa-cogs me-2"></i>
+                    <span class="sidebar-text">Parts</span>
+                </a>
+                
+                <a class="nav-link d-flex align-items-center" href="{{ route('categories.index') }}">
+                    <i class="fas fa-list me-2"></i>
+                    <span class="sidebar-text">Categories</span>
+                </a>
+                
+                <a class="nav-link d-flex align-items-center" href="{{ route('compatibles.index') }}">
+                    <i class="fas fa-car me-2"></i>
+                    <span class="sidebar-text">Compatibles</span>
+                </a>
+                <!-- User Section -->
+                <div class="user-section mt-auto">
+                    <div class="nav-link d-flex align-items-center">
+                        <i class="fas fa-user me-2"></i>
+                        <span class="sidebar-text">{{ Auth::user()->name }}</span>
+                    </div>
+                    <form action="{{ route('logout') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="nav-link d-flex align-items-center w-100 border-0 bg-transparent text-start" style="color: rgba(255, 255, 255, 0.8);">
+                            <i class="fas fa-sign-out-alt me-2"></i>
+                            <span class="sidebar-text">Logout</span>
+                        </button>
+                    </form>
+                </div>
+            @else
+                <a class="nav-link d-flex align-items-center" href="{{ route('login') }}">
+                    <i class="fas fa-sign-in-alt me-2"></i>
+                    <span class="sidebar-text">Login</span>
+                </a>
+                
+                <a class="nav-link d-flex align-items-center" href="{{ route('register') }}">
+                    <i class="fas fa-user-plus me-2"></i>
+                    <span class="sidebar-text">Register</span>
+                </a>
+            @endauth
+        </nav>
     </div>
 
     <!-- Main Content -->
-    <main class="container mt-4">
-    <!-- Breadcrumb -->
-        @if(View::hasSection('breadcrumb'))
-            <nav aria-label="breadcrumb" class="mt-2">
-                <ol class="breadcrumb">
-                    @yield('breadcrumb')
-                </ol>
-            </nav>
-        @endif
-        @yield('content')
-    </main>
+    <div class="main-content" id="mainContent">
+        <!-- Alert Messages -->
+        <div class="container-fluid mt-3">
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>{{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+        </div>
+
+        <!-- Main Content Area -->
+        <main class="container-fluid mt-4">
+            <!-- Breadcrumb -->
+            @if(View::hasSection('breadcrumb'))
+                <nav aria-label="breadcrumb" class="mt-2">
+                    <ol class="breadcrumb">
+                        @yield('breadcrumb')
+                    </ol>
+                </nav>
+            @endif
+            @yield('content')
+        </main>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const toggleBtn = document.getElementById('toggleSidebar');
+            const mobileOverlay = document.getElementById('mobileOverlay');
+            
+            // Toggle sidebar when clicking brand
+            toggleBtn.addEventListener('click', function() {
+                if (window.innerWidth <= 768) {
+                    // Mobile behavior
+                    sidebar.classList.toggle('show');
+                    mobileOverlay.classList.toggle('show');
+                } else {
+                    // Desktop behavior
+                    sidebar.classList.toggle('collapsed');
+                    mainContent.classList.toggle('expanded');
+                }
+            });
+            
+            // Close sidebar when clicking overlay (mobile)
+            mobileOverlay.addEventListener('click', function() {
+                sidebar.classList.remove('show');
+                mobileOverlay.classList.remove('show');
+            });
+            
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    sidebar.classList.remove('show');
+                    mobileOverlay.classList.remove('show');
+                } else {
+                    sidebar.classList.remove('collapsed');
+                    mainContent.classList.remove('expanded');
+                }
+            });
+        });
+    </script>
 </body>
 </html>

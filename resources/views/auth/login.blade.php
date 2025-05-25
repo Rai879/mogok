@@ -5,7 +5,7 @@
 
 @section('content')
 <div class="row justify-content-center">
-    <div class="col-md-6 mt-4 col-lg-4">
+    <div class="mt-4 col-lg-4">
         <div class="card shadow">
             <div class="card-header bg-primary text-white text-center">
                 <h4><i class="fas fa-sign-in-alt me-2"></i>Login</h4>

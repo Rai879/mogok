@@ -2,6 +2,11 @@
 
 @section('title', 'Sparepart')
 
+@section('breadcrumb')
+    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Parts</li>
+@endsection
+
 @section('content')
 
     <div class="card" style="border: 1px solid #dee2e6; border-radius: 8px;">
