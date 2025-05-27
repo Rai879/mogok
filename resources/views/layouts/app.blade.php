@@ -8,6 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        /* Desktop Sidebar Styles */
         .sidebar {
             min-height: 100vh;
             width: 250px;
@@ -47,10 +48,12 @@
             font-size: 1.5rem;
             font-weight: bold;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
         }
         
         .sidebar-brand:hover {
             color: white;
+            background: rgba(255, 255, 255, 0.1);
         }
         
         .main-content {
@@ -61,10 +64,6 @@
         
         .main-content.expanded {
             margin-left: 70px;
-        }
-        
-        .sidebar-brand:hover {
-            background: rgba(255, 255, 255, 0.1);
         }
         
         .sidebar-text {
@@ -82,45 +81,171 @@
             width: 100%;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
+
+        /* Mobile Navbar Styles */
+        .mobile-navbar {
+            display: none;
+        }
+
+        .navbar-brand-mobile {
+            color: white !important;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .navbar-toggler {
+            border: none;
+            padding: 4px 8px;
+        }
+
+        .navbar-toggler:focus {
+            box-shadow: none;
+        }
+
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+
+        .mobile-nav-item:last-child {
+            border-bottom: none;
+        }
+
+        .mobile-nav-link {
+            color: rgba(255, 255, 255, 0.8) !important;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .mobile-nav-link:hover {
+            color: white !important;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .mobile-nav-link i {
+            margin-right: 8px;
+            width: 20px;
+        }
+
+        .mobile-user-section {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 8px;
+            padding-top: 8px;
+        }
+
         @media (max-width: 768px) {
+            /* Hide desktop sidebar */
             .sidebar {
-                transform: translateX(-100%);
+                display: none;
             }
             
-            .sidebar.show {
-                transform: translateX(0);
+            /* Show mobile navbar */
+            .mobile-navbar {
+                display: block;
             }
             
+            /* Adjust main content */
             .main-content {
                 margin-left: 0;
+                padding-top: 76px; /* Height of navbar */
             }
-            
-            .mobile-overlay {
-                display: none;
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.5);
-                z-index: 999;
-            }
-            
-            .mobile-overlay.show {
-                display: block;
+        }
+
+        @media (min-width: 769px) {
+            /* Ensure mobile navbar is hidden on desktop */
+            .mobile-navbar {
+                display: none !important;
             }
         }
     </style>
 </head>
 <body class="bg-light">
-    <!-- Mobile Overlay -->
-    <div class="mobile-overlay" id="mobileOverlay"></div>
+    <!-- Mobile Navbar -->
+    <nav class="navbar navbar-expand-lg fixed-top mobile-navbar" style="background: #0d6efd;">
+        <div class="container-fluid">
+            <a class="navbar-brand navbar-brand-mobile d-flex align-items-center" href="#">
+                <i class="fas fa-tools me-2"></i>
+                <span>Mogok</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mobileNavContent" aria-controls="mobileNavContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="mobileNavContent">
+                <div class="navbar-nav w-100 mt-3">
+                    @auth
+                        <!-- Main Navigation -->
+                        <div class="mobile-nav-item">
+                            <a class="mobile-nav-link" href="{{ route('dashboard') }}">
+                                <i class="fas fa-tachometer-alt"></i>
+                                <span>Dashboard</span>
+                            </a>
+                        </div>
 
-    <!-- Sidebar -->
+                        <div class="mobile-nav-item">
+                            <a class="mobile-nav-link" href="{{ route('parts.index') }}">
+                                <i class="fas fa-cogs"></i>
+                                <span>Part</span>
+                            </a>
+                        </div>
+                        
+                        <div class="mobile-nav-item">
+                            <a class="mobile-nav-link" href="{{ route('categories.index') }}">
+                                <i class="fas fa-list"></i>
+                                <span>Kategori</span>
+                            </a>
+                        </div>
+                        
+                        <div class="mobile-nav-item">
+                            <a class="mobile-nav-link" href="{{ route('compatibles.index') }}">
+                                <i class="fas fa-car"></i>
+                                <span>Kecocokan</span>
+                            </a>
+                        </div>
+
+                        <!-- User Section -->
+                        <div class="mobile-user-section">
+                            <div class="mobile-nav-item">
+                                <div class="mobile-nav-link">
+                                    <i class="fas fa-user"></i>
+                                    <span>{{ Auth::user()->name }}</span>
+                                </div>
+                            </div>
+                            <div class="mobile-nav-item">
+                                <form action="{{ route('logout') }}" method="POST" class="m-0">
+                                    @csrf
+                                    <button type="submit" class="mobile-nav-link w-100 border-0 bg-transparent text-start">
+                                        <i class="fas fa-sign-out-alt"></i>
+                                        <span>Logout</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    @else
+                        <div class="mobile-nav-item">
+                            <a class="mobile-nav-link" href="{{ route('login') }}">
+                                <i class="fas fa-sign-in-alt"></i>
+                                <span>Login</span>
+                            </a>
+                        </div>
+                        
+                        <div class="mobile-nav-item">
+                            <a class="mobile-nav-link" href="{{ route('register') }}">
+                                <i class="fas fa-user-plus"></i>
+                                <span>Register</span>
+                            </a>
+                        </div>
+                    @endauth
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Desktop Sidebar -->
     <div class="sidebar" id="sidebar">
         <!-- Brand as Toggle -->
-        <div class="sidebar-brand d-flex align-items-center text-decoration-none" id="toggleSidebar" style="cursor: pointer;">
+        <div class="sidebar-brand d-flex align-items-center text-decoration-none" id="toggleSidebar">
             <i class="fas fa-tools me-2"></i>
             <span class="sidebar-text">Mogok</span>
         </div>
@@ -136,18 +261,19 @@
 
                 <a class="nav-link d-flex align-items-center" href="{{ route('parts.index') }}">
                     <i class="fas fa-cogs me-2"></i>
-                    <span class="sidebar-text">Parts</span>
+                    <span class="sidebar-text">Part</span>
                 </a>
                 
                 <a class="nav-link d-flex align-items-center" href="{{ route('categories.index') }}">
                     <i class="fas fa-list me-2"></i>
-                    <span class="sidebar-text">Categories</span>
+                    <span class="sidebar-text">Kategori</span>
                 </a>
                 
                 <a class="nav-link d-flex align-items-center" href="{{ route('compatibles.index') }}">
                     <i class="fas fa-car me-2"></i>
-                    <span class="sidebar-text">Compatibles</span>
+                    <span class="sidebar-text">Kecocokan</span>
                 </a>
+                
                 <!-- User Section -->
                 <div class="user-section mt-auto">
                     <div class="nav-link d-flex align-items-center">
@@ -215,36 +341,41 @@
             const sidebar = document.getElementById('sidebar');
             const mainContent = document.getElementById('mainContent');
             const toggleBtn = document.getElementById('toggleSidebar');
-            const mobileOverlay = document.getElementById('mobileOverlay');
             
-            // Toggle sidebar when clicking brand
-            toggleBtn.addEventListener('click', function() {
-                if (window.innerWidth <= 768) {
-                    // Mobile behavior
-                    sidebar.classList.toggle('show');
-                    mobileOverlay.classList.toggle('show');
-                } else {
-                    // Desktop behavior
+            // Only handle desktop sidebar toggle
+            if (toggleBtn && window.innerWidth > 768) {
+                toggleBtn.addEventListener('click', function() {
                     sidebar.classList.toggle('collapsed');
                     mainContent.classList.toggle('expanded');
-                }
-            });
+                });
+            }
             
-            // Close sidebar when clicking overlay (mobile)
-            mobileOverlay.addEventListener('click', function() {
-                sidebar.classList.remove('show');
-                mobileOverlay.classList.remove('show');
-            });
-            
-            // Handle window resize
+            // Handle window resize for desktop sidebar
             window.addEventListener('resize', function() {
                 if (window.innerWidth > 768) {
-                    sidebar.classList.remove('show');
-                    mobileOverlay.classList.remove('show');
+                    // Reset any mobile classes that might be applied
+                    if (sidebar.classList.contains('collapsed')) {
+                        mainContent.classList.add('expanded');
+                    } else {
+                        mainContent.classList.remove('expanded');
+                    }
                 } else {
-                    sidebar.classList.remove('collapsed');
+                    // On mobile, ensure desktop classes are removed
                     mainContent.classList.remove('expanded');
                 }
+            });
+
+            // Auto-close mobile navbar when clicking on a link
+            const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+            const navbarCollapse = document.getElementById('mobileNavContent');
+            
+            mobileNavLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth <= 768 && navbarCollapse.classList.contains('show')) {
+                        const bsCollapse = new bootstrap.Collapse(navbarCollapse);
+                        bsCollapse.hide();
+                    }
+                });
             });
         });
     </script>

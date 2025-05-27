@@ -8,12 +8,41 @@ use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $categories = Category::all();
+        $query = Category::query();
+
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where('name', 'like', "%{$search}%")
+                  ->orWhere('slug', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+        }
+
+        // Sorting functionality
+        $allowedSorts = ['name', 'slug', 'description', 'is_active', 'created_at', 'updated_at'];
+        $sort = $request->get('sort', 'name'); // default sort by name
+        $direction = $request->get('direction', 'asc'); // default ascending
+        
+        // Validate sort column
+        if (!in_array($sort, $allowedSorts)) {
+            $sort = 'name';
+        }
+        
+        // Validate sort direction
+        if (!in_array($direction, ['asc', 'desc'])) {
+            $direction = 'asc';
+        }
+        
+        // Apply sorting
+        $query->orderBy($sort, $direction);
+
+        $categories = $query->get();
+
+        $categories = $query->paginate(10);
+
         return view('categories.index', compact('categories'));
     }
-
     public function create()
     {
         return view('categories.create');
