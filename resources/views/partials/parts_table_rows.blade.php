@@ -1,21 +1,21 @@
 {{-- resources/views/partials/parts_table_rows.blade.php --}}
 @forelse ($parts as $part)
     <tr>
-        <td>{{ $part->name }}</td>
-        <td>{{ $part->part_number }}</td>
         <td>
             @if ($part->image)
                 <img src="{{ asset('storage/' . $part->image) }}" alt="[Image of Sparepart]" class="img-thumbnail" style="max-width: 50px; height: auto; border-radius: 3px;">
             @else
-                Tidak Ada Gambar
+                <i>Tidak Ada Gambar</i>
             @endif
+            <br>
+            {{ $part->name }}
         </td>
+        <td>{{ $part->part_number }}</td>
+       
         <td>{{ $part->category->name ?? '-' }}</td>
         <td>Rp {{ number_format($part->price, 0, ',', '.') }}</td>
         <td>{{ $part->stock_quantity }}</td>
-        <td>{{ $part->minimum_stock }}</td>
-        <td>{{ $part->condition }}</td>
-        <td>{{ $part->brand ?? '-' }}</td>
+       
         <td><span class="badge {{ $part->is_active ? 'bg-success' : 'bg-secondary' }}">
                 {{ $part->is_active ? 'Aktif' : 'Nonaktif' }}</span></td>
         <td>

@@ -7,7 +7,10 @@
         <div class="card-body">
             <span class="rounded">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4>Daftar Kategori</h4>
+                    <div class="d-flex align-items-center mb-4">
+                        <i class="fas fa-list fa-2x me-2"></i>
+                        <h1 class="mb-0">Daftar Kategori</h1>
+                    </div>
                     <form action="{{ route('categories.index') }}" method="GET" class="d-flex">
                         <input type="text" name="search" class="form-control me-2" placeholder="Cari Kategori..."
                             value="{{ request('search') }}">
@@ -23,9 +26,9 @@
                     <thead class="table-light">
                         <tr>
                             <th>
-                                <a href="{{ route('categories.index', array_merge(request()->query(), ['sort' => 'name', 'direction' => request('sort') == 'name' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}" 
-                                   class="text-decoration-none text-dark">
-                                    Nama 
+                                <a href="{{ route('categories.index', array_merge(request()->query(), ['sort' => 'name', 'direction' => request('sort') == 'name' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}"
+                                    class="text-decoration-none text-dark">
+                                    Nama
                                     @if(request('sort') == 'name')
                                         @if(request('direction') == 'asc')
                                             <i class="fas fa-sort-up"></i>
@@ -38,9 +41,9 @@
                                 </a>
                             </th>
                             <th>
-                                <a href="{{ route('categories.index', array_merge(request()->query(), ['sort' => 'slug', 'direction' => request('sort') == 'slug' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}" 
-                                   class="text-decoration-none text-dark">
-                                    Slug 
+                                <a href="{{ route('categories.index', array_merge(request()->query(), ['sort' => 'slug', 'direction' => request('sort') == 'slug' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}"
+                                    class="text-decoration-none text-dark">
+                                    Slug
                                     @if(request('sort') == 'slug')
                                         @if(request('direction') == 'asc')
                                             <i class="fas fa-sort-up"></i>
@@ -53,9 +56,9 @@
                                 </a>
                             </th>
                             <th>
-                                <a href="{{ route('categories.index', array_merge(request()->query(), ['sort' => 'description', 'direction' => request('sort') == 'description' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}" 
-                                   class="text-decoration-none text-dark">
-                                    Deskripsi 
+                                <a href="{{ route('categories.index', array_merge(request()->query(), ['sort' => 'description', 'direction' => request('sort') == 'description' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}"
+                                    class="text-decoration-none text-dark">
+                                    Deskripsi
                                     @if(request('sort') == 'description')
                                         @if(request('direction') == 'asc')
                                             <i class="fas fa-sort-up"></i>
@@ -68,9 +71,9 @@
                                 </a>
                             </th>
                             <th>
-                                <a href="{{ route('categories.index', array_merge(request()->query(), ['sort' => 'is_active', 'direction' => request('sort') == 'is_active' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}" 
-                                   class="text-decoration-none text-dark">
-                                    Aktif 
+                                <a href="{{ route('categories.index', array_merge(request()->query(), ['sort' => 'is_active', 'direction' => request('sort') == 'is_active' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}"
+                                    class="text-decoration-none text-dark">
+                                    Aktif
                                     @if(request('sort') == 'is_active')
                                         @if(request('direction') == 'asc')
                                             <i class="fas fa-sort-up"></i>
@@ -114,12 +117,12 @@
                         @endforelse
                     </tbody>
                 </table>
-                
+
                 <!-- Custom Pagination -->
                 <div class="d-flex justify-content-between align-items-center mt-3">
                     <div>
                         <small class="text-muted">
-                            Menampilkan {{ $categories->firstItem() ?? 0 }} hingga {{ $categories->lastItem() ?? 0 }} 
+                            Menampilkan {{ $categories->firstItem() ?? 0 }} hingga {{ $categories->lastItem() ?? 0 }}
                             dari {{ $categories->total() }} hasil
                         </small>
                     </div>
@@ -136,7 +139,8 @@
                                         </li>
                                     @else
                                         <li class="page-item">
-                                            <a class="page-link" href="{{ $categories->appends(request()->query())->previousPageUrl() }}">
+                                            <a class="page-link"
+                                                href="{{ $categories->appends(request()->query())->previousPageUrl() }}">
                                                 <i class="fas fa-chevron-left"></i>
                                             </a>
                                         </li>
@@ -162,7 +166,8 @@
                                             </li>
                                         @else
                                             <li class="page-item">
-                                                <a class="page-link" href="{{ $categories->appends(request()->query())->url($i) }}">{{ $i }}</a>
+                                                <a class="page-link"
+                                                    href="{{ $categories->appends(request()->query())->url($i) }}">{{ $i }}</a>
                                             </li>
                                         @endif
                                     @endfor
@@ -175,14 +180,16 @@
                                             </li>
                                         @endif
                                         <li class="page-item">
-                                            <a class="page-link" href="{{ $categories->appends(request()->query())->url($categories->lastPage()) }}">{{ $categories->lastPage() }}</a>
+                                            <a class="page-link"
+                                                href="{{ $categories->appends(request()->query())->url($categories->lastPage()) }}">{{ $categories->lastPage() }}</a>
                                         </li>
                                     @endif
 
                                     {{-- Next Page Link --}}
                                     @if ($categories->hasMorePages())
                                         <li class="page-item">
-                                            <a class="page-link" href="{{ $categories->appends(request()->query())->nextPageUrl() }}">
+                                            <a class="page-link"
+                                                href="{{ $categories->appends(request()->query())->nextPageUrl() }}">
                                                 <i class="fas fa-chevron-right"></i>
                                             </a>
                                         </li>
@@ -199,66 +206,7 @@
                     </div>
                 </div>
 
-                <style>
-                    .pagination-sm .page-link {
-                        padding: 0.375rem 0.75rem;
-                        font-size: 0.875rem;
-                        border-radius: 0.375rem;
-                        margin: 0 2px;
-                        border: 1px solid #dee2e6;
-                        color: #6c757d;
-                        transition: all 0.15s ease-in-out;
-                    }
-                    
-                    .pagination-sm .page-link:hover {
-                        background-color: #e9ecef;
-                        border-color: #adb5bd;
-                        color: #495057;
-                        transform: translateY(-1px);
-                    }
-                    
-                    .pagination-sm .page-item.active .page-link {
-                        background-color: #0d6efd;
-                        border-color: #0d6efd;
-                        color: white;
-                        box-shadow: 0 2px 4px rgba(13, 110, 253, 0.25);
-                    }
-                    
-                    .pagination-sm .page-item.disabled .page-link {
-                        color: #adb5bd;
-                        background-color: #fff;
-                        border-color: #dee2e6;
-                        cursor: not-allowed;
-                    }
-                    
-                    .pagination-sm .page-item:first-child .page-link,
-                    .pagination-sm .page-item:last-child .page-link {
-                        border-radius: 0.375rem;
-                    }
-                    
-                    .pagination {
-                        gap: 2px;
-                    }
-                    
-                    .page-link i {
-                        font-size: 0.75rem;
-                    }
-                    
-                    /* Sorting header styles */
-                    th a {
-                        display: flex;
-                        align-items: center;
-                        justify-content: space-between;
-                        width: 100%;
-                    }
-                    
-                    th a:hover {
-                        background-color: rgba(0, 0, 0, 0.05);
-                        border-radius: 4px;
-                        padding: 4px 8px;
-                        margin: -4px -8px;
-                    }
-                </style>
+
             </span>
         </div>
     </div>

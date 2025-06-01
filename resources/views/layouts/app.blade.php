@@ -200,7 +200,7 @@
                         
                         <div class="mobile-nav-item">
                             <a class="mobile-nav-link" href="{{ route('compatibles.index') }}">
-                                <i class="fas fa-car"></i>
+                                <i class="fas fa-bicycle"></i>
                                 <span>Kecocokan</span>
                             </a>
                         </div>
@@ -271,7 +271,7 @@
                 </a>
                 
                 <a class="nav-link d-flex align-items-center" href="{{ route('compatibles.index') }}">
-                    <i class="fas fa-car me-2"></i>
+                    <i class="fas fa-bicycle me-2"></i>
                     <span class="sidebar-text">Kecocokan</span>
                 </a>
                 
