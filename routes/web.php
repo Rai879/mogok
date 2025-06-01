@@ -24,6 +24,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::resource('categories', CategoryController::class);
-    Route::resource('parts', PartController::class);
+    // Route::resource('parts', PartController::class);
     Route::resource('compatibles', CompatibleController::class);
+
+    //route pada parts
+    Route::resource('parts', PartController::class)->only([
+        'index', 'store', 'update', 'destroy'
+    ]);
 });

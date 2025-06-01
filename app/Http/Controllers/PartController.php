@@ -5,130 +5,194 @@ namespace App\Http\Controllers;
 use App\Models\Part;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage; // Import Storage Facade
 
 class PartController extends Controller
 {
+    /**
+     * Menampilkan daftar sparepart.
+     * Dapat menangani pencarian, pengurutan, dan paginasi.
+     * Mengembalikan partial view untuk request AJAX.
+     *
+     * @param Request $request
+     * @return \Illuminate\View\View|\Illuminate\Http\Response
+     */
     public function index(Request $request)
     {
-        $query = Part::with('category'); // Eager loading relationship
-        
-        // Search functionality
-        if ($request->filled('search')) {
+        $query = Part::with('category');
+
+        // Logika pencarian
+        if ($request->has('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%')
-                  ->orWhere('description', 'like', '%' . $search . '%')
-                  ->orWhereHas('category', function($categoryQuery) use ($search) {
-                      $categoryQuery->where('name', 'like', '%' . $search . '%');
-                  });
-            });
+            $query->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('part_number', 'like', '%' . $search . '%');
         }
-        
-        // Sorting functionality
-        $allowedSorts = ['name', 'price', 'stock_quantity', 'is_active', 'category_id', 'created_at'];
-        $sort = $request->get('sort', 'name'); // default sort by name
-        $direction = $request->get('direction', 'asc'); // default ascending
-        
-        // Validate sort column
-        if (!in_array($sort, $allowedSorts)) {
-            $sort = 'name';
-        }
-        
-        // Validate sort direction
-        if (!in_array($direction, ['asc', 'desc'])) {
-            $direction = 'asc';
-        }
-        
-        // Apply sorting
-        if ($sort === 'category_id') {
-            // Special handling for category sorting - join with categories table
-            $query->leftJoin('categories', 'parts.category_id', '=', 'categories.id')
-                  ->orderBy('categories.name', $direction)
-                  ->select('parts.*'); // Select only parts columns to avoid conflicts
-        } else {
-            $query->orderBy($sort, $direction);
-        }
-        
-        // Pagination - 10 items per page (you can change this)
-        $parts = $query->paginate(10);
-        
-        return view('parts.index', compact('parts'));
-    }
-    public function create()
-    {
+
+        // Logika pengurutan
+        $sort = $request->get('sort', 'name');
+        $direction = $request->get('direction', 'asc');
+        $query->orderBy($sort, $direction);
+
+        // Paginasi hasil
+        $parts = $query->paginate(10)->withQueryString();
         $categories = Category::all();
-        return view('parts.create', compact('categories'));
+
+        // Jika request adalah AJAX, kembalikan hanya partial view untuk baris tabel
+        if ($request->ajax()) {
+            return view('partials.parts_table_rows', compact('parts'))->render();
+        }
+
+        // Jika bukan AJAX, kembalikan halaman lengkap
+        return view('parts.index', compact('parts', 'categories'));
     }
 
+    /**
+     * Menyimpan sparepart baru ke database.
+     * Mengembalikan respon JSON untuk request AJAX.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(Request $request)
     {
-    $data = $request->validate([
-        'name' => 'required',
-        'part_number' => 'required|unique:parts',
-        'description' => 'nullable',
-        'category_id' => 'required|exists:categories,id',
-        'brand' => 'nullable',
-        'price' => 'required|numeric',
-        'stock_quantity' => 'required|integer',
-        'minimum_stock' => 'required|integer',
-        'condition' => 'required|in:new,used,refurbished',
-        'specifications' => 'nullable',
-        'image' => 'nullable',
-        'notes' => 'nullable',
-        // 'is_active' tidak divalidasi di sini, kita tangani manual
-    ]);
+        try {
+            // Validasi data yang masuk
+            $validatedData = $request->validate([
+                'name' => 'required|string|max:255',
+                'part_number' => 'required|string|max:255|unique:parts,part_number',
+                'description' => 'nullable|string',
+                'category_id' => 'required|exists:categories,id',
+                'brand' => 'nullable|string|max:255',
+                'price' => 'required|numeric|min:0',
+                'stock_quantity' => 'required|integer|min:0',
+                'minimum_stock' => 'required|integer|min:0',
+                'condition' => 'required|in:new,used,refurbished',
+                'specifications' => 'nullable|string',
+                'notes' => 'nullable|string',
+                'is_active' => 'boolean', // Validasi ini akan memastikan nilai adalah boolean yang valid (0 atau 1)
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Validasi gambar (2MB)
+            ]);
 
-    // Atur nilai is_active secara eksplisit: 1 jika checkbox dicentang, 0 jika tidak
-    $data['is_active'] = $request->has('is_active') ? 1 : 0;
+            // --- PERBAIKAN UNTUK is_active ---
+            // Gunakan $request->boolean() untuk mendapatkan nilai boolean yang benar dari checkbox
+            $validatedData['is_active'] = $request->boolean('is_active');
 
-    // Konversi spesifikasi menjadi JSON jika ada
-    if ($request->filled('specifications')) {
-        $data['specifications'] = json_encode($request->specifications);
+            // Tangani spesifikasi
+            if ($request->filled('specifications')) {
+                $decodedSpecs = json_decode($validatedData['specifications'], true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    $validatedData['specifications'] = json_encode($decodedSpecs);
+                }
+            } else {
+                $validatedData['specifications'] = null;
+            }
+
+            // Tangani upload gambar
+            if ($request->hasFile('image')) {
+                $imagePath = $request->file('image')->store('parts', 'public'); // Simpan di storage/app/public/parts
+                $validatedData['image'] = $imagePath;
+            } else {
+                $validatedData['image'] = null; // Pastikan kolom image null jika tidak ada file
+            }
+
+            $part = Part::create($validatedData);
+
+            return response()->json(['message' => 'Sparepart berhasil ditambahkan.', 'part' => $part], 201);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors(), 'message' => 'Validasi gagal.'], 422);
+        } 
     }
 
-    Part::create($data);
-
-    return redirect()->route('parts.index')->with('success', 'Sparepart berhasil ditambahkan.');
-    }
-
-
-    public function edit(Part $part)
-    {
-        $categories = Category::all();
-        return view('parts.edit', compact('part', 'categories'));
-    }
-
+    /**
+     * Memperbarui sparepart yang ada di database.
+     * Mengembalikan respon JSON untuk request AJAX.
+     *
+     * @param Request $request
+     * @param Part $part
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function update(Request $request, Part $part)
     {
-        $data = $request->validate([
-            'name' => 'required',
-            'part_number' => 'required|unique:parts,part_number,' . $part->id,
-            'description' => 'nullable',
-            'category_id' => 'required|exists:categories,id',
-            'brand' => 'nullable',
-            'price' => 'required|numeric',
-            'stock_quantity' => 'required|integer',
-            'minimum_stock' => 'required|integer',
-            'condition' => 'required|in:new,used,refurbished',
-            'specifications' => 'nullable',
-            'image' => 'nullable',
-            'notes' => 'nullable',
-            'is_active' => 'boolean',
-        ]);
+        try {
+            // Validasi data yang masuk
+            $validatedData = $request->validate([
+                'name' => 'required|string|max:255',
+                'part_number' => ['required', 'string', 'max:255', Rule::unique('parts', 'part_number')->ignore($part->id)],
+                'description' => 'nullable|string',
+                'category_id' => 'required|exists:categories,id',
+                'brand' => 'nullable|string|max:255',
+                'price' => 'required|numeric|min:0',
+                'stock_quantity' => 'required|integer|min:0',
+                'minimum_stock' => 'required|integer|min:0',
+                'condition' => 'required|in:new,used,refurbished',
+                'specifications' => 'nullable|string',
+                'notes' => 'nullable|string',
+                'is_active' => 'boolean', // Validasi ini akan memastikan nilai adalah boolean yang valid (0 atau 1)
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Validasi gambar
+            ]);
 
-        if ($request->specifications) {
-            $data['specifications'] = json_encode($request->specifications);
-        }
+            // --- PERBAIKAN UNTUK is_active ---
+            // Gunakan $request->boolean() untuk mendapatkan nilai boolean yang benar dari checkbox
+            $validatedData['is_active'] = $request->boolean('is_active');
 
-        $part->update($data);
-        return redirect()->route('parts.index')->with('success', 'Sparepart berhasil diperbarui.');
+            // Tangani spesifikasi
+            if ($request->filled('specifications')) {
+                $decodedSpecs = json_decode($validatedData['specifications'], true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    $validatedData['specifications'] = json_encode($decodedSpecs);
+                }
+            } else {
+                $validatedData['specifications'] = null;
+            }
+
+            // Tangani upload gambar baru atau penghapusan gambar lama
+            if ($request->hasFile('image')) {
+                // Hapus gambar lama jika ada
+                if ($part->image) {
+                    Storage::disk('public')->delete($part->image);
+                }
+                $imagePath = $request->file('image')->store('parts', 'public');
+                $validatedData['image'] = $imagePath;
+            } elseif ($request->has('remove_current_image') && $request->input('remove_current_image') === '1') {
+                // Jika tombol "Hapus Gambar" ditekan dari frontend
+                if ($part->image) {
+                    Storage::disk('public')->delete($part->image);
+                }
+                $validatedData['image'] = null;
+            } else {
+                // Jika tidak ada upload baru dan tidak ada permintaan hapus, pertahankan gambar lama
+                $validatedData['image'] = $part->image;
+            }
+
+            $part->update($validatedData);
+
+            return response()->json(['message' => 'Sparepart berhasil diperbarui.', 'part' => $part], 200);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors(), 'message' => 'Validasi gagal.'], 422);
+        } 
     }
 
+    /**
+     * Menghapus sparepart dari database.
+     * Mengembalikan respon JSON untuk request AJAX.
+     *
+     * @param Part $part
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function destroy(Part $part)
     {
-        $part->delete();
-        return redirect()->route('parts.index')->with('success', 'Sparepart berhasil dihapus.');
+        try {
+            // Hapus gambar terkait jika ada
+            if ($part->image) {
+                Storage::disk('public')->delete($part->image);
+            }
+            $part->delete();
+            return response()->json(['message' => 'Sparepart berhasil dihapus.'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Gagal menghapus sparepart.', 'error' => $e->getMessage()], 500);
+        }
     }
-
-    
 }
