@@ -1,6 +1,6 @@
 {{-- resources/views/parts/index.blade.php --}}
 
-@extends('layouts.app')
+    @extends('layouts.app')
 
 @section('title', 'Daftar Sparepart')
 

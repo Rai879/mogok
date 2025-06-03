@@ -46,6 +46,21 @@ class Part extends Model
         return $this->hasMany(Compatible::class);
     }
 
+    public function barcodes()
+    {
+        return $this->hasMany(PartBarcode::class);
+    }
+
+    public function tempTransactions()
+    {
+        return $this->hasMany(TempTransaction::class);
+    }
+
+    public function transactionDetails()
+    {
+        return $this->hasMany(TransactionDetail::class);
+    }
+
     // Scope untuk part aktif
     public function scopeActive($query)
     {

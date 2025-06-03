@@ -195,4 +195,26 @@ class PartController extends Controller
             return response()->json(['message' => 'Gagal menghapus sparepart.', 'error' => $e->getMessage()], 500);
         }
     }
+    public function search(Request $request)
+    {
+        $query = $request->input('query');
+        $parts = Part::where('name', 'like', '%' . $query . '%')
+                     ->orWhere('part_number', 'like', '%' . $query . '%')
+                     ->select('id', 'name', 'price', 'stock_quantity')
+                     ->limit(10)
+                     ->get();
+        return response()->json($parts);
+    }
+
+    public function getPartByBarcode($barcode)
+    {
+        $partBarcode = PartBarcode::where('barcode', $barcode)->first();
+        if ($partBarcode) {
+            $part = $partBarcode->part;
+            return response()->json($part);
+        }
+        return response()->json(['message' => 'Part not found for this barcode.'], 404);
+    }
+
+
 }

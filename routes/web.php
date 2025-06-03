@@ -6,6 +6,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PartController;
 use App\Http\Controllers\CompatibleController;
+use App\Http\Controllers\PartBarcodeController;
+use App\Http\Controllers\TransactionController;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -26,6 +28,22 @@ Route::middleware('auth')->group(function () {
     Route::resource('categories', CategoryController::class);
     // Route::resource('parts', PartController::class);
     Route::resource('compatibles', CompatibleController::class);
+    Route::resource('part-barcodes', PartBarcodeController::class); // For CRUD of barcodes
+
+    // Transaction routes
+    Route::get('/transactions/checkout', [TransactionController::class, 'checkout'])->name('transactions.checkout');
+    Route::post('/transactions/add-to-cart', [TransactionController::class, 'addToCart'])->name('transactions.add_to_cart');
+    Route::patch('/transactions/update-cart-quantity/{tempTransaction}', [TransactionController::class, 'updateCartQuantity'])->name('transactions.update_cart_quantity');
+    Route::delete('/transactions/remove-from-cart/{tempTransaction}', [TransactionController::class, 'removeFromCart'])->name('transactions.remove_from_cart');
+    Route::post('/transactions/process', [TransactionController::class, 'processTransaction'])->name('transactions.process');
+    Route::get('/transactions/history', [TransactionController::class, 'history'])->name('transactions.history');
+    Route::get('/transactions/{transaction}', [TransactionController::class, 'show'])->name('transactions.show');
+
+    // API endpoint for searching parts (used by JavaScript)
+    Route::get('/api/parts/search', [PartController::class, 'search'])->name('api.parts.search');
+    // API endpoint to get part by barcode
+    Route::get('/api/parts/by-barcode/{barcode}', [PartController::class, 'getPartByBarcode'])->name('api.parts.by_barcode');
+
 
     //route pada parts
     Route::resource('parts', PartController::class)->only([
