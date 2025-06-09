@@ -2,7 +2,12 @@
 
 @section('content')
 <div class="container">
-    <h1>Transaction History</h1>
+    <div class="card" style="border: 1px solid #dee2e6; border-radius: 8px;">
+            <div class="card-body">
+    <div class="d-flex align-items-center mb-4">
+                    <i class="fas fa-history fa-2x me-2"></i>
+                    <h1>Transaction History</h1>
+                </div>
 
     @if (session('success'))
         <div class="alert alert-success">
@@ -42,5 +47,7 @@
     </table>
 
     {{ $transactions->links() }}
+            </div>
+        </div>
 </div>
 @endsection

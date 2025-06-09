@@ -2,6 +2,8 @@
 
 @section('content')
 <div class="container">
+    <div class="card" style="border: 1px solid #dee2e6; border-radius: 8px;">
+            <div class="card-body">
     <h1>Transaction Details - Invoice: {{ $transaction->invoice_number }}</h1>
 
     <div class="card mb-4">
@@ -47,5 +49,7 @@
     </div>
 
     <a href="{{ route('transactions.history') }}" class="btn btn-secondary mt-3">Back to History</a>
+            </div>
+        </div>
 </div>
 @endsection
