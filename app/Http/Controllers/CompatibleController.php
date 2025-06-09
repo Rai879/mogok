@@ -3,118 +3,82 @@
 namespace App\Http\Controllers;
 
 use App\Models\Compatible;
-use App\Models\Part;
+use App\Models\Part; // Import the Part model
 use Illuminate\Http\Request;
 
 class CompatibleController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Compatible::with('part');
+        $query = Compatible::with('part'); // Eager load the part relationship
 
-        if ($request->has('search')) {
-            $search = $request->search;
-            $query->whereHas('part', function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%");
-            })
-            ->orWhere('vehicle_make', 'like', "%{$search}%")
-            ->orWhere('vehicle_model', 'like', "%{$search}%")
-            ->orWhere('vehicle_year', 'like', "%{$search}%")
-            ->orWhere('engine_type', 'like', "%{$search}%");
-        }
-
-         // Handle sorting
-        $sortField = $request->get('sort', 'id'); // Default sorting by id
-        $sortDirection = $request->get('direction', 'desc'); // Default descending
-        
-        // Validasi sort field untuk keamanan
-        $allowedSortFields = [
-            'part_name',
-            'vehicle_make', 
-            'vehicle_model', 
-            'vehicle_year', 
-            'engine_type', 
-            'is_verified',
-            'created_at',
-            'updated_at'
-        ];
-        
-        if (!in_array($sortField, $allowedSortFields)) {
-            $sortField = 'id';
-        }
-        
-        // Validasi sort direction
-        if (!in_array(strtolower($sortDirection), ['asc', 'desc'])) {
-            $sortDirection = 'desc';
-        }
-        
-        // Apply sorting
-        if ($sortField === 'part_name') {
-            // Sorting berdasarkan nama part (relasi)
-            $query->join('parts', 'compatibles.part_id', '=', 'parts.id')
-                  ->select('compatibles.*')
-                  ->orderBy('parts.name', $sortDirection);
+        if ($request->filled('sort') && $request->filled('direction')) {
+            if ($request->sort == 'part_name') {
+                $query->join('parts', 'compatibles.part_id', '=', 'parts.id')
+                      ->orderBy('parts.name', $request->direction)
+                      ->select('compatibles.*'); // Select compatibles columns to avoid ambiguity
+            } else {
+                $query->orderBy($request->sort, $request->direction);
+            }
         } else {
-            // Sorting berdasarkan field langsung dari tabel compatibles
-            $query->orderBy($sortField, $sortDirection);
+            $query->orderBy('vehicle_make', 'asc'); // Default sort
         }
-
-        $compatibles = $query->get();
 
         $compatibles = $query->paginate(10);
+        $parts = Part::all(); // Get all parts for the autocomplete dropdown
 
-        return view('compatibles.index', compact('compatibles'));
-        }
-
-
-
-    public function create()
-    {
-        $parts = Part::all();
-        return view('compatibles.create', compact('parts'));
+        return view('compatibles.index', compact('compatibles', 'parts'));
     }
 
     public function store(Request $request)
     {
-        $data = $request->validate([
+        $request->validate([
             'part_id' => 'required|exists:parts,id',
-            'vehicle_make' => 'required',
-            'vehicle_model' => 'required',
-            'vehicle_year' => 'nullable',
-            'engine_type' => 'nullable',
-            'notes' => 'nullable',
+            'vehicle_make' => 'required|string|max:255',
+            'vehicle_model' => 'required|string|max:255',
+            'vehicle_year' => 'required|integer|min:1900|max:' . (date('Y') + 5),
+            'engine_type' => 'nullable|string|max:255',
             'is_verified' => 'boolean',
         ]);
 
-        Compatible::create($data);
-        return redirect()->route('compatibles.index')->with('success', 'Kecocokan berhasil ditambahkan.');
-    }
+        Compatible::create([
+            'part_id' => $request->part_id,
+            'vehicle_make' => $request->vehicle_make,
+            'vehicle_model' => $request->vehicle_model,
+            'vehicle_year' => $request->vehicle_year,
+            'engine_type' => $request->engine_type,
+            'is_verified' => $request->has('is_verified'),
+        ]);
 
-    public function edit(Compatible $compatible)
-    {
-        $parts = Part::all();
-        return view('compatibles.edit', compact('compatible', 'parts'));
+        return redirect()->route('compatibles.index')->with('success', 'Kecocokan berhasil ditambahkan!');
     }
 
     public function update(Request $request, Compatible $compatible)
     {
-        $data = $request->validate([
+        $request->validate([
             'part_id' => 'required|exists:parts,id',
-            'vehicle_make' => 'required',
-            'vehicle_model' => 'required',
-            'vehicle_year' => 'nullable',
-            'engine_type' => 'nullable',
-            'notes' => 'nullable',
+            'vehicle_make' => 'required|string|max:255',
+            'vehicle_model' => 'required|string|max:255',
+            'vehicle_year' => 'required|integer|min:1900|max:' . (date('Y') + 5),
+            'engine_type' => 'nullable|string|max:255',
             'is_verified' => 'boolean',
         ]);
 
-        $compatible->update($data);
-        return redirect()->route('compatibles.index')->with('success', 'Kecocokan berhasil diperbarui.');
+        $compatible->update([
+            'part_id' => $request->part_id,
+            'vehicle_make' => $request->vehicle_make,
+            'vehicle_model' => $request->vehicle_model,
+            'vehicle_year' => $request->vehicle_year,
+            'engine_type' => $request->engine_type,
+            'is_verified' => $request->has('is_verified'),
+        ]);
+
+        return redirect()->route('compatibles.index')->with('success', 'Kecocokan berhasil diperbarui!');
     }
 
     public function destroy(Compatible $compatible)
     {
         $compatible->delete();
-        return redirect()->route('compatibles.index')->with('success', 'Kecocokan berhasil dihapus.');
+        return redirect()->route('compatibles.index')->with('success', 'Kecocokan berhasil dihapus!');
     }
 }

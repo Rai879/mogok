@@ -11,7 +11,8 @@ class PartBarcodeController extends Controller
     public function index()
     {
         $partBarcodes = PartBarcode::with('part')->paginate(10);
-        return view('part_barcodes.index', compact('partBarcodes'));
+        $parts = Part::all(); // Get all parts for the dropdown
+        return view('part_barcodes.index', compact('partBarcodes', 'parts'));
     }
 
     public function create()

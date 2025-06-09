@@ -90,7 +90,7 @@
         }
 
         .navbar-brand-mobile {
-            color: white !important;
+            color: black !important;
             font-size: 1.5rem;
             font-weight: bold;
         }
@@ -113,7 +113,7 @@
         }
 
         .mobile-nav-link {
-            color: rgba(255, 255, 255, 0.8) !important;
+            color: black !important;
             padding: 12px 16px;
             display: flex;
             align-items: center;
@@ -122,7 +122,7 @@
         }
 
         .mobile-nav-link:hover {
-            color: white !important;
+            color: black !important;
             background: rgba(255, 255, 255, 0.1);
         }
 
@@ -169,7 +169,7 @@
 
 <body class="bg-light">
     <!-- Mobile Navbar -->
-    <nav class="navbar navbar-expand-lg fixed-top mobile-navbar" style="background: #0d6efd;">
+    <nav class="navbar navbar-expand-lg fixed-top mobile-navbar" style="border-radius: 8px; backdrop-filter: blur(20px); background-color: rgba(255, 255, 255, 0.5); box-shadow: 0 1px 12px rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.3);">
         <div class="container-fluid">
             <a class="navbar-brand navbar-brand-mobile d-flex align-items-center" href="#">
                 <i class="fas fa-tools me-2"></i>
@@ -177,7 +177,7 @@
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mobileNavContent"
                 aria-controls="mobileNavContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
+                <span class="navbar-toggler-icon" style="filter: invert(1) brightness(0.2);"></span>
             </button>
             <div class="collapse navbar-collapse" id="mobileNavContent">
                 <div class="navbar-nav w-100 mt-3">

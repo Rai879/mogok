@@ -8,44 +8,52 @@
                     <i class="fas fa-shopping-cart fa-2x me-2"></i>
                     <h1>Checkout</h1>
                 </div>
-                @if (session('success'))
-                    <div class="alert alert-success">
-                        {{ session('success') }}
-                    </div>
-                @endif
-
-                @if (session('error'))
-                    <div class="alert alert-danger">
-                        {{ session('error') }}
-                    </div>
-                @endif
 
                 <div class="mb-4 p-3 border rounded" style="background-color: #f8f9fa;">
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <h3>Add Part by Barcode</h3>
-                            <form id="barcodeForm" action="{{ route('transactions.add_to_cart') }}" method="POST">
-                                @csrf
+                    <div class="row">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            
+                                <h3>Add Part by Barcode</h3>
+                                <form id="barcodeForm" action="{{ route('transactions.add_to_cart') }}" method="POST">
+                                    @csrf
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" placeholder="Scan or type barcode"
+                                            id="barcodeInput" name="barcode" autofocus>
+                                        <button class="btn btn-outline-secondary" type="submit">Add by Barcode</button>
+                                    </div>
+                                </form>
+                            
+                                <h3>Search and Add Part</h3>
                                 <div class="input-group mb-3">
-                                    <input type="text" class="form-control" placeholder="Scan or type barcode"
-                                        id="barcodeInput" name="barcode" autofocus>
-                                    <button class="btn btn-outline-secondary" type="submit">Add by Barcode</button>
+                                    <input type="text" class="form-control" placeholder="Search part name or part number"
+                                        id="partSearchInput">
+                                    <button class="btn btn-outline-secondary" type="button" id="searchButton">Search</button>
                                 </div>
-                            </form>
+                                <div id="searchResults" class="list-group">
+                                </div>
+                            
                         </div>
                         <div class="col-md-6">
-                            <h3>Search and Add Part</h3>
-                            <div class="input-group mb-3">
-                                <input type="text" class="form-control" placeholder="Search part name or part number"
-                                    id="partSearchInput">
-                                <button class="btn btn-outline-secondary" type="button" id="searchButton">Search</button>
-                            </div>
-                            <div id="searchResults" class="list-group">
-                            </div>
+                            
+                                <h4>Total Amount: <span id="totalAmount">Rp {{ number_format($totalAmount, 2) }}</span></h4>
+                                <form action="{{ route('transactions.process') }}" method="POST" id="transactionForm">
+                                    @csrf
+                                    <div class="mb-3">
+                                        <label for="cashPaid" class="form-label">Cash Paid (Rp)</label>
+                                        <input type="number" step="0.01" class="form-control" id="cashPaid" name="cash_paid"
+                                            required min="{{ $totalAmount }}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="changeDue" class="form-label">Change Due (Rp)</label>
+                                        <input type="text" class="form-control" id="changeDue" readonly value="0.00">
+                                    </div>
+                                    <button type="submit" class="btn btn-success btn-lg w-100"
+                                        id="processTransactionBtn">Process Transaction</button>
+                                </form>
+                           
                         </div>
                     </div>
                 </div>
-
                 <hr>
 
                 <div class="mb-4 p-3 border rounded" style="background-color: #f8f9fa;">
@@ -97,27 +105,7 @@
                 </table>
                 </div>
 
-                <div class="row">
-                    <div class="col-md-6 offset-md-6">
-                        <div class="card p-3">
-                            <h4>Total Amount: <span id="totalAmount">Rp {{ number_format($totalAmount, 2) }}</span></h4>
-                            <form action="{{ route('transactions.process') }}" method="POST" id="transactionForm">
-                                @csrf
-                                <div class="mb-3">
-                                    <label for="cashPaid" class="form-label">Cash Paid (Rp)</label>
-                                    <input type="number" step="0.01" class="form-control" id="cashPaid" name="cash_paid"
-                                        required min="{{ $totalAmount }}">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="changeDue" class="form-label">Change Due (Rp)</label>
-                                    <input type="text" class="form-control" id="changeDue" readonly value="0.00">
-                                </div>
-                                <button type="submit" class="btn btn-success btn-lg w-100"
-                                    id="processTransactionBtn">Process Transaction</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
+               
             </div>
 
         </div>
