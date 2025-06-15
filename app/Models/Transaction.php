@@ -17,7 +17,13 @@ class Transaction extends Model
     ];
 
     public function details()
-    {
-        return $this->hasMany(TransactionDetail::class);
-    }
+{
+    return $this->hasMany(TransactionDetail::class);
+}
+
+// app/Models/TransactionDetail.php
+public function part()
+{
+    return $this->belongsTo(Part::class);
+}
 }

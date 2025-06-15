@@ -10,8 +10,10 @@ class PartBarcodeController extends Controller
 {
     public function index()
     {
-        $partBarcodes = PartBarcode::with('part')->paginate(10);
-        $parts = Part::all(); // Get all parts for the dropdown
+        // Data PartBarcode diambil dengan paginasi 10 item per halaman
+        $partBarcodes = PartBarcode::with('part')->paginate(10); 
+        
+        $parts = Part::all(); // Mengambil semua data Parts untuk fitur autocomplete
         return view('part_barcodes.index', compact('partBarcodes', 'parts'));
     }
 

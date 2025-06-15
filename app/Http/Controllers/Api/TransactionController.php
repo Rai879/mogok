@@ -10,6 +10,7 @@ use App\Models\TransactionDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class TransactionController extends Controller
 {
@@ -149,10 +150,49 @@ class TransactionController extends Controller
         return response()->json(['message' => 'Transaction completed successfully!', 'change_due' => $changeDue], 200);
     }
 
-    public function getHistory()
+    // app/Http/Controllers/Api/TransactionController.php
+
+public function getHistory()
     {
-        $transactions = Transaction::orderBy('created_at', 'desc')->paginate(10);
-        return response()->json($transactions);
+        $startTime = microtime(true); // Mulai hitung waktu eksekusi
+        Log::info('getHistory: Request received. Current memory: ' . round(memory_get_usage(true) / (1024 * 1024), 2) . ' MB');
+
+        try {
+            $transactions = Transaction::with([
+                    'details' => function($query) {
+                        $query->select('id', 'transaction_id', 'part_id', 'quantity', 'price_at_transaction')
+                              ->with([
+                                'part' => function($query) {
+                                    $query->select('id', 'name', 'part_number', 'price');
+                                }
+                              ]);
+                    }
+                ])
+                ->select('id', 'invoice_number', 'total_amount', 'cash_paid', 'change_due', 'created_at')
+                ->orderBy('created_at', 'desc')
+                ->paginate(10); // Ambil 10 transaksi per halaman
+
+            $queryTime = microtime(true);
+            Log::info('getHistory: Query executed. Count: ' . $transactions->count() . '. Memory after query: ' . round(memory_get_usage(true) / (1024 * 1024), 2) . ' MB. Query duration: ' . round(($queryTime - $startTime) * 1000, 2) . ' ms.');
+
+            // Mengubah collection paginated menjadi array untuk logging
+            $dataForLogging = $transactions->toArray();
+            // Jika data terlalu besar untuk dilog, Anda bisa hanya log beberapa properti
+            Log::debug('getHistory: Response data snippet (first item): ' . json_encode(array_slice($dataForLogging['data'], 0, 1)));
+
+            $endTime = microtime(true);
+            Log::info('getHistory: Response sent. Total duration: ' . round(($endTime - $startTime) * 1000, 2) . ' ms.');
+
+            return response()->json($transactions);
+
+        } catch (\Exception $e) {
+            $endTime = microtime(true);
+            Log::error('getHistory: Error occurred. Duration: ' . round(($endTime - $startTime) * 1000, 2) . ' ms. Message: ' . $e->getMessage() . ' on line ' . $e->getLine());
+            return response()->json([
+                'message' => 'Failed to retrieve transaction history due to a server error.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     public function show($transactionId)

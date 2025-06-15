@@ -47,10 +47,94 @@
                     </tbody>
                 </table>
 
-                {{-- Penting: Paginasi Laravel akan tetap berfungsi untuk data awal yang dimuat.
-                     Pencarian realtime ini hanya memfilter data di halaman saat ini.
-                     Untuk pencarian di seluruh dataset dengan paginasi, Anda perlu AJAX ke backend. --}}
-                {{ $transactions->links() }}
+                {{-- Custom Paginasi di sini --}}
+                <div class="d-flex justify-content-between align-items-center mt-3" id="paginationLinks">
+                    <div>
+                        <small class="text-muted">
+                            Menampilkan {{ $transactions->firstItem() ?? 0 }} hingga {{ $transactions->lastItem() ?? 0 }}
+                            dari {{ $transactions->total() }} hasil
+                        </small>
+                    </div>
+                    <div>
+                        @if ($transactions->hasPages())
+                            <nav aria-label="Pagination">
+                                <ul class="pagination pagination-sm mb-0">
+                                    {{-- Link Halaman Sebelumnya --}}
+                                    @if ($transactions->onFirstPage())
+                                        <li class="page-item disabled">
+                                            <span class="page-link">
+                                                <i class="fas fa-chevron-left"></i>
+                                            </span>
+                                        </li>
+                                    @else
+                                        <li class="page-item">
+                                            <a class="page-link"
+                                                href="{{ $transactions->appends(request()->query())->previousPageUrl() }}">
+                                                <i class="fas fa-chevron-left"></i>
+                                            </a>
+                                        </li>
+                                    @endif
+
+                                    {{-- Halaman Pertama --}}
+                                    @if ($transactions->currentPage() > 3)
+                                        <li class="page-item">
+                                            <a class="page-link"
+                                                href="{{ $transactions->appends(request()->query())->url(1) }}">1</a>
+                                        </li>
+                                        @if ($transactions->currentPage() > 4)
+                                            <li class="page-item disabled">
+                                                <span class="page-link">...</span>
+                                            </li>
+                                        @endif
+                                    @endif
+
+                                    {{-- Nomor Halaman --}}
+                                    @for ($i = max(1, $transactions->currentPage() - 2); $i <= min($transactions->lastPage(), $transactions->currentPage() + 2); $i++)
+                                        @if ($i == $transactions->currentPage())
+                                            <li class="page-item active">
+                                                <span class="page-link">{{ $i }}</span>
+                                            </li>
+                                        @else
+                                            <li class="page-item">
+                                                <a class="page-link"
+                                                    href="{{ $transactions->appends(request()->query())->url($i) }}">{{ $i }}</a>
+                                            </li>
+                                        @endif
+                                    @endfor
+
+                                    {{-- Halaman Terakhir --}}
+                                    @if ($transactions->currentPage() < $transactions->lastPage() - 2)
+                                        @if ($transactions->currentPage() < $transactions->lastPage() - 3)
+                                            <li class="page-item disabled">
+                                                <span class="page-link">...</span>
+                                            </li>
+                                        @endif
+                                        <li class="page-item">
+                                            <a class="page-link"
+                                                href="{{ $transactions->appends(request()->query())->url($transactions->lastPage()) }}">{{ $transactions->lastPage() }}</a>
+                                        </li>
+                                    @endif
+
+                                    {{-- Link Halaman Berikutnya --}}
+                                    @if ($transactions->hasMorePages())
+                                        <li class="page-item">
+                                            <a class="page-link"
+                                                href="{{ $transactions->appends(request()->query())->nextPageUrl() }}">
+                                                <i class="fas fa-chevron-right"></i>
+                                            </a>
+                                        </li>
+                                    @else
+                                        <li class="page-item disabled">
+                                            <span class="page-link">
+                                                <i class="fas fa-chevron-right"></i>
+                                            </span>
+                                        </li>
+                                    @endif
+                                </ul>
+                            </nav>
+                        @endif
+                    </div>
+                </div>
             </div>
         </div>
     </div>

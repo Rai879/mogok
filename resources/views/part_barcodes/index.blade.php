@@ -86,9 +86,98 @@
                             @endforeach
                         </tbody>
                     </table>
+                    <div class="d-flex justify-content-between align-items-center mt-3" id="paginationLinks">
+                        <div>
+                            <small class="text-muted">
+                                Menampilkan {{ $partBarcodes->firstItem() ?? 0 }} hingga
+                                {{ $partBarcodes->lastItem() ?? 0 }}
+                                dari {{ $partBarcodes->total() }} hasil
+                            </small>
+                        </div>
+                        <div>
+                            @if ($partBarcodes->hasPages())
+                                <nav aria-label="Pagination">
+                                    <ul class="pagination pagination-sm mb-0">
+                                        {{-- Link Halaman Sebelumnya --}}
+                                        @if ($partBarcodes->onFirstPage())
+                                            <li class="page-item disabled">
+                                                <span class="page-link">
+                                                    <i class="fas fa-chevron-left"></i>
+                                                </span>
+                                            </li>
+                                        @else
+                                            <li class="page-item">
+                                                <a class="page-link"
+                                                    href="{{ $partBarcodes->appends(request()->query())->previousPageUrl() }}">
+                                                    <i class="fas fa-chevron-left"></i>
+                                                </a>
+                                            </li>
+                                        @endif
+
+                                        {{-- Halaman Pertama --}}
+                                        @if ($partBarcodes->currentPage() > 3)
+                                            <li class="page-item">
+                                                <a class="page-link"
+                                                    href="{{ $partBarcodes->appends(request()->query())->url(1) }}">1</a>
+                                            </li>
+                                            @if ($partBarcodes->currentPage() > 4)
+                                                <li class="page-item disabled">
+                                                    <span class="page-link">...</span>
+                                                </li>
+                                            @endif
+                                        @endif
+
+                                        {{-- Nomor Halaman --}}
+                                        @for ($i = max(1, $partBarcodes->currentPage() - 2); $i <= min($partBarcodes->lastPage(), $partBarcodes->currentPage() + 2); $i++)
+                                            @if ($i == $partBarcodes->currentPage())
+                                                <li class="page-item active">
+                                                    <span class="page-link">{{ $i }}</span>
+                                                </li>
+                                            @else
+                                                <li class="page-item">
+                                                    <a class="page-link"
+                                                        href="{{ $partBarcodes->appends(request()->query())->url($i) }}">{{ $i }}</a>
+                                                </li>
+                                            @endif
+                                        @endfor
+
+                                        {{-- Halaman Terakhir --}}
+                                        @if ($partBarcodes->currentPage() < $partBarcodes->lastPage() - 2)
+                                            @if ($partBarcodes->currentPage() < $partBarcodes->lastPage() - 3)
+                                                <li class="page-item disabled">
+                                                    <span class="page-link">...</span>
+                                                </li>
+                                            @endif
+                                            <li class="page-item">
+                                                <a class="page-link"
+                                                    href="{{ $partBarcodes->appends(request()->query())->url($partBarcodes->lastPage()) }}">{{ $partBarcodes->lastPage() }}</a>
+                                            </li>
+                                        @endif
+
+                                        {{-- Link Halaman Berikutnya --}}
+                                        @if ($partBarcodes->hasMorePages())
+                                            <li class="page-item">
+                                                <a class="page-link"
+                                                    href="{{ $partBarcodes->appends(request()->query())->nextPageUrl() }}">
+                                                    <i class="fas fa-chevron-right"></i>
+                                                </a>
+                                            </li>
+                                        @else
+                                            <li class="page-item disabled">
+                                                <span class="page-link">
+                                                    <i class="fas fa-chevron-right"></i>
+                                                </span>
+                                            </li>
+                                        @endif
+                                    </ul>
+                                </nav>
+                            @endif
+                        </div>
+                    </div>
                 </div>
 
-                {{ $partBarcodes->links() }}
+
+
             </div>
         </div>
     </div>

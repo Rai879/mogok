@@ -1,24 +1,21 @@
-<?php
+// app/Providers/RouteServiceProvider.php
 
-namespace App\Providers;
+// ...
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
-
-class RouteServiceProvider extends ServiceProvider
+public function boot(): void
 {
-    /**
-     * Define your route model bindings, pattern filters, etc.
-     */
-    public function boot(): void
-    {
-        $this->routes(function () {
-            Route::middleware('api')
-                ->prefix('api')
-                ->group(base_path('routes/api.php'));
+    // Hapus atau komentari baris ini jika Anda mendefinisikan RateLimiter di routes/api.php
+    // $this->configureRateLimiting();
 
-            Route::middleware('web')
-                ->group(base_path('routes/web.php'));
-        });
-    }
+    // ...
 }
+
+// Hapus atau komentari seluruh method ini jika Anda mendefinisikan RateLimiter di routes/api.php
+/*
+protected function configureRateLimiting(): void
+{
+    RateLimiter::for('api', function (Request $request) {
+        return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+    });
+}
+*/
