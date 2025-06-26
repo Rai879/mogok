@@ -39,11 +39,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/transactions/history', [TransactionController::class, 'history'])->name('transactions.history');
     Route::get('/transactions/{transaction}', [TransactionController::class, 'show'])->name('transactions.show');
 
-    // API endpoint for searching parts (used by JavaScript)
-    Route::get('/api/parts/search', [PartController::class, 'search'])->name('api.parts.search');
-    // API endpoint to get part by barcode
-    Route::get('/api/parts/by-barcode/{barcode}', [PartController::class, 'getPartByBarcode'])->name('api.parts.by_barcode');
-
+   
 
     //route pada parts
     Route::resource('parts', PartController::class)->only([

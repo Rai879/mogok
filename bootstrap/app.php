@@ -3,48 +3,42 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-// HAPUS import RateLimiting, Request, RateLimiter jika ada di sini
-// use Illuminate\Cache\RateLimiting\Limit;
-// use Illuminate\Http\Request;
-// use Illuminate\Support\Facades\RateLimiter;
 
+return Application::configure(basePath: dirname(__DIR__))->withRouting(
+    web: __DIR__.'/../routes/web.php',
+    api: __DIR__.'/../routes/api.php',
+    commands: __DIR__.'/../routes/console.php',
+    channels: __DIR__.'/../routes/channels.php',
+    health: '/up',
+)->withMiddleware(function (Middleware $middleware) {
+    // -------------------------------------------------------------------
+    // GRUP MIDDLEWARE 'WEB' - DIKOSONGKAN TOTAL UNTUK DIAGNOSA
+    // Ini adalah cara paling agresif untuk menghilangkan semua potensi
+    // middleware web yang menyebabkan redirect untuk request API.
+    // Jika ini memperbaiki masalah, kita akan tahu masalahnya ada pada
+    // salah satu middleware web yang biasanya.
+    // -------------------------------------------------------------------
+    $middleware->web(append: [
+        // KOSONGKAN INI, JANGAN ADA APAPUN DI SINI UNTUK TES
+        // Ini akan membuat situs web Anda (jika diakses via browser)
+        // mungkin tidak berfungsi dengan benar (misal: sesi, CSRF),
+        // tapi ini hanya untuk TEST API.
+    ]);
 
-return Application::configure(basePath: dirname(__DIR__))
-    ->withRouting(
-        web: __DIR__.'/../routes/web.php',
-        api: __DIR__.'/../routes/api.php',
-        commands: __DIR__.'/../routes/console.php',
-        channels: __DIR__.'/../routes/channels.php',
-        health: '/up',
-    )
-    ->withMiddleware(function (Middleware $middleware) {
-        // Konfigurasi Middleware Group 'web'
-        $middleware->web(append: [
+    // GRUP MIDDLEWARE 'API' - Tetap standar untuk Sanctum
+    $middleware->api(prepend: [
+        \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+        // 'throttle:api', // TETAP HAPUS INI jika sudah di routes/api.php
+    ]);
 
-            \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
-        ]);
+    // Alias Middleware - Ini penting, JANGAN diubah
+    $middleware->alias([
+        'auth' => \App\Http\Middleware\Authenticate::class,
+        'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
+        'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
+    ]);
 
-        // Konfigurasi Middleware Group 'api'
-        $middleware->api(prepend: [
-            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
-            // HAPUS 'throttle:api' dari sini JIKA ANDA MENGGUNAKANNYA DI routes/api.php
-            // Karena definisi rate limiter sudah dipindahkan ke AppServiceProvider.
-            // Biarkan kosong di sini.
-        ]);
-
-        // Alias Middleware (SANGAT PENTING!)
-        $middleware->alias([
-            'auth' => \App\Http\Middleware\Authenticate::class,
-            'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
-            'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class, // Ini PENTING!
-        ]);
-
-        // HAPUS SEMUA DEFINISI RateLimiter::for(...) DARI SINI (jika ada)
-        // Contoh:
-        // RateLimiter::for('api', function (Request $request) { ... });
-        // RateLimiter::for('login', function (Request $request) { ... });
-
-    })
-    ->withExceptions(function (Exceptions $exceptions) {
-        // Konfigurasi penanganan pengecualian
-    })->create();
+    // HAPUS SEMUA DEFINISI RateLimiter::for(...) DARI SINI
+})->withExceptions(function (Exceptions $exceptions) {
+    //
+})->create();
